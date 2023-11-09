@@ -1,0 +1,35 @@
+#######################################
+# Syntax Coloring Map For
+# esp basic time
+#######################################
+
+#######################################
+# Data Types (KEYWORD1)
+#######################################
+
+BasicTime   KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+addLogger  KEYWORD2
+setup  KEYWORD2
+setWaitingFunction  KEYWORD2
+waitForNTP  KEYWORD2
+handle  KEYWORD2
+requestNtpTime  KEYWORD2
+dateString  KEYWORD2
+timeString  KEYWORD2
+dateTimeString  KEYWORD2
+isDST  KEYWORD2
+
+#######################################
+# (KEYWORD3)
+#######################################
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
