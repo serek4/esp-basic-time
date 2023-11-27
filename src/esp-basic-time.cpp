@@ -129,8 +129,13 @@ void BasicTime::_NTPsyncInterval(const char* message) {
 			logMessage += (String)(_NTPReSyncInterval / SECS_PER_HOUR) + "h";
 			break;
 		case timeSet:
-			setSyncInterval(_NTPSyncInterval);    // set long sync interval on successful sync
-			logMessage += (String)(_NTPSyncInterval / SECS_PER_HOUR) + "h";
+			if (millis() < NTP_FIRST_SYNC_INTERVAL_THRESHOLD) {
+				setSyncInterval(_NTPnoSyncInterval);    // set very short sync interval on first sync
+				logMessage += (String)(_NTPnoSyncInterval / SECS_PER_MIN) + "m";
+			} else {
+				setSyncInterval(_NTPSyncInterval);    // set long sync interval on successful sync
+				logMessage += (String)(_NTPSyncInterval / SECS_PER_HOUR) + "h";
+			}
 			break;
 
 		default:
