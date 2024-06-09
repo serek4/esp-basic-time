@@ -9,14 +9,14 @@
 BasicWiFi wifi(WIFI_SSID, WIFI_PASS);
 BasicTime NTPclient(TIMEZONE);
 
-long loopDelay = -25000;
+u_long loopDelay = 0;
 
 void setup() {
 	Serial.begin(115200);
 	Serial.println();
 	wifi.setup();
 	NTPclient.setup();
-	if (wifi.waitForConnection() == BasicWiFi::connected) {
+	if (wifi.waitForConnection() == BasicWiFi::wifi_got_ip) {
 		NTPclient.waitForNTP();
 	}
 	Serial.println("setup done!");
@@ -25,8 +25,7 @@ void setup() {
 void loop() {
 	NTPclient.handle();
 	if (millis() - loopDelay >= 30000) {
-		Serial.println(NTPclient.dateTimeString());
 		loopDelay = millis();
+		Serial.println(NTPclient.dateTimeString());
 	}
-	delay(10);
 }
