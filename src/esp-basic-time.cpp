@@ -7,8 +7,9 @@ uint16_t BasicTime::_NTPServerPort = DEFAULT_NTP_PORT;
 int BasicTime::_timezone = DEFAULT_TIMEZONE;
 bool BasicTime::_waitingForNTP = false;
 u_long BasicTime::_requestSendedAt;
+bool BasicTime::_networkReady = false;
 bool BasicTime::_gotNTPserverIP = false;
-IPAddress BasicTime::_NTPServerIP;
+IPAddress BasicTime::_NTPServerIP = NULL_IP_ADDR;
 time_t BasicTime::_NTPSyncInterval = NTP_NORMAL_SYNC_INTERVAL;           // timeSet sync interval
 time_t BasicTime::_NTPReSyncInterval = NTP_SHORT_SYNC_INTERVAL;          // timeNeedsSync sync interval
 time_t BasicTime::_NTPnoSyncInterval = NTP_NO_TIME_SET_SYNC_INTERVAL;    // timeNotSet sync interval
@@ -37,6 +38,9 @@ void BasicTime::setup() {
 	setSyncProvider(requestNtpTime);
 	NTPudp.onPacket(_NTPrequestCallback);
 }
+void BasicTime::setNetworkReady(bool ready) {
+	_networkReady = ready;
+}
 void BasicTime::setWaitingFunction(void (*connectingIndicator)(u_long onTime, u_long offTime)) {
 	_connectingIndicator = connectingIndicator;
 }
@@ -61,7 +65,11 @@ bool BasicTime::waitForNTP(int waitTime) {
 }
 //request time from NTP server
 time_t BasicTime::requestNtpTime() {
-	if (_gotNTPserverIP) {
+	if (_networkReady) {
+		if (_NTPServerIP == NULL_IP_ADDR) {
+			WiFi.hostByName(_NTPServerAddress.c_str(), _NTPServerIP);
+			if (_logger != nullptr) { (*_logger)("ntp", "new ntp server ip: " + _NTPServerIP.toString()); }
+		}
 		BASIC_TIME_PRINTLN("Syncing time with NTP");
 		_sendNTPpacket(_NTPServerIP, _NTPServerPort);
 	}
@@ -81,7 +89,7 @@ void BasicTime::_NTPrequestCallback(AsyncUDPPacket& packet) {    // response pac
 }
 // sync time response checker
 void BasicTime::handle() {
-	if (!_gotNTPserverIP && WiFi.isConnected()) {    // waiting for WiFi connection to get NTP server IP
+	if (_networkReady && !_gotNTPserverIP) {    // waiting for WiFi connection to get NTP server IP
 		_gotNTPserverIP = WiFi.hostByName(_NTPServerAddress.c_str(), _NTPServerIP);
 		if (_logger != nullptr) { (*_logger)("ntp", "ntp server ip: " + _NTPServerIP.toString()); }
 		if (timeStatus() != timeSet) {

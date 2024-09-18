@@ -14,6 +14,8 @@ u_long loopDelay = 0;
 void setup() {
 	Serial.begin(115200);
 	Serial.println();
+	wifi.onGotIP([](GOT_IP_HANDLER_ARGS) { NTPclient.setNetworkReady(true); });
+	wifi.onDisconnected([](DISCONNECTED_HANDLER_ARGS) { NTPclient.setNetworkReady(false); });
 	wifi.setup();
 	NTPclient.setup();
 	if (wifi.waitForConnection() == BasicWiFi::wifi_got_ip) {

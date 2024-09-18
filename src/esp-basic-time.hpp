@@ -24,6 +24,12 @@
 #endif
 // clang-format on
 
+#if defined(ARDUINO_ARCH_ESP32)
+#define NULL_IP_ADDR INADDR_NONE
+#elif defined(ARDUINO_ARCH_ESP8266)
+#define NULL_IP_ADDR INADDR_ANY
+#endif
+
 #define TIME_BLINK_ON 100
 #define TIME_BLINK_OFF 150
 #define TIME_NO_BLINK TIME_BLINK_ON + TIME_BLINK_OFF
@@ -47,6 +53,7 @@ class BasicTime {
 
 	void addLogger(void (*logger)(String logLevel, String msg));
 	void setup();
+	void setNetworkReady(bool ready);
 	void setWaitingFunction(void (*connectingIndicator)(u_long onTime, u_long offTime));
 	bool waitForNTP(int waitTime = 10);
 	void handle();
@@ -63,6 +70,7 @@ class BasicTime {
 	static int _timezone;
 	static bool _waitingForNTP;
 	static u_long _requestSendedAt;
+	static bool _networkReady;
 	static bool _gotNTPserverIP;
 	static time_t _NTPSyncInterval;      // timeSet sync interval
 	static time_t _NTPReSyncInterval;    // timeNeedsSync sync interval
