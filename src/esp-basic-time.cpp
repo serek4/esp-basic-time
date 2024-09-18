@@ -88,6 +88,7 @@ void BasicTime::handle() {
 		}
 	}
 	if (_waitingForNTP && millis() - _requestSendedAt >= NTP_TIMEOUT) {    // NTP packet sended waiting for response
+		NTPudp.close();
 		_NTPsyncInterval("No response from NTP server\nNext sync in ");
 		_waitingForNTP = false;
 	}
