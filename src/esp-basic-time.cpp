@@ -35,6 +35,7 @@ void BasicTime::addLogger(void (*logger)(String logLevel, String msg)) {
 void BasicTime::setup() {
 	setSyncInterval(_NTPReSyncInterval);
 	setSyncProvider(requestNtpTime);
+	NTPudp.onPacket(_NTPrequestCallback);
 }
 void BasicTime::setWaitingFunction(void (*connectingIndicator)(u_long onTime, u_long offTime)) {
 	_connectingIndicator = connectingIndicator;
@@ -62,9 +63,7 @@ bool BasicTime::waitForNTP(int waitTime) {
 time_t BasicTime::requestNtpTime() {
 	if (_gotNTPserverIP) {
 		BASIC_TIME_PRINTLN("Syncing time with NTP");
-		if (_sendNTPpacket(_NTPServerIP, _NTPServerPort)) {
-			NTPudp.onPacket(_NTPrequestCallback);
-		}
+		_sendNTPpacket(_NTPServerIP, _NTPServerPort);
 	}
 	return 0;
 }
