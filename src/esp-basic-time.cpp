@@ -83,6 +83,7 @@ void BasicTime::_NTPrequestCallback(AsyncUDPPacket& packet) {    // response pac
 void BasicTime::handle() {
 	if (!_gotNTPserverIP && WiFi.isConnected()) {    // waiting for WiFi connection to get NTP server IP
 		_gotNTPserverIP = WiFi.hostByName(_NTPServerAddress.c_str(), _NTPServerIP);
+		if (_logger != nullptr) { (*_logger)("ntp", "ntp server ip: " + _NTPServerIP.toString()); }
 		if (timeStatus() != timeSet) {
 			requestNtpTime();
 		}
