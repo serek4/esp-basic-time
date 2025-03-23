@@ -4,4 +4,4 @@ This library is part of [framework](https://github.com/serek4/esp-basic-framewor
 
 ### [esp8266 Arduino core - 3.1.2](https://github.com/esp8266/Arduino/tree/3.1.2) / [esp32 Arduino core - 3.1.3](https://github.com/espressif/arduino-esp32/tree/3.1.3)
 
-### [TimeLib.h](https://github.com/PaulStoffregen/Time)
+### modified [TimeLib.h](https://github.com/serek4/Time)

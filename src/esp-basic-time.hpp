@@ -47,9 +47,9 @@
 
 class BasicTime {
   public:
-	BasicTime(int timezone);
-	BasicTime(const char* NTP_server_address, int timezone);
 	BasicTime(const char* NTP_server_address, int NTP_server_port, int timezone);
+	BasicTime(const char* NTP_server_address, int timezone);
+	BasicTime(int timezone);
 
 	void addLogger(void (*logger)(String logLevel, String msg));
 	void setup();
@@ -57,28 +57,28 @@ class BasicTime {
 	void setWaitingFunction(void (*connectingIndicator)(u_long onTime, u_long offTime));
 	bool waitForNTP(int waitTime = 10);
 	void handle();
-	static time_t requestNtpTime();
+	time_t requestNtpTime();
 	static String dateString(time_t timeStamp = now());
 	static String timeString(time_t timeStamp = now());
 	static String dateTimeString(time_t timeStamp = now());
 	static bool isDST(time_t timeStamp = now());
 
   private:
-	static String _NTPServerAddress;
-	static IPAddress _NTPServerIP;
-	static uint16_t _NTPServerPort;
+	String _NTPServerAddress;
+	IPAddress _NTPServerIP;
+	uint16_t _NTPServerPort;
 	static int _timezone;
-	static bool _waitingForNTP;
-	static u_long _requestSendedAt;
-	static bool _networkReady;
-	static bool _gotNTPserverIP;
-	static time_t _NTPSyncInterval;      // timeSet sync interval
-	static time_t _NTPReSyncInterval;    // timeNeedsSync sync interval
-	static time_t _NTPnoSyncInterval;    // timeNotSet sync interval
+	bool _waitingForNTP;
+	u_long _requestSendedAt;
+	bool _networkReady;
+	bool _gotNTPserverIP;
+	time_t _NTPSyncInterval;      // timeSet sync interval
+	time_t _NTPReSyncInterval;    // timeNeedsSync sync interval
+	time_t _NTPnoSyncInterval;    // timeNotSet sync interval
 
 	void (*_connectingIndicator)(u_long onTime, u_long offTime);
-	static void (*_logger)(String logLevel, String msg);
-	static void _NTPrequestCallback(AsyncUDPPacket& packet);
-	static bool _sendNTPpacket(IPAddress& address, uint16_t port);
-	static void _NTPsyncInterval(const char* message);
+	void (*_logger)(String logLevel, String msg);
+	void _NTPrequestCallback(AsyncUDPPacket& packet);
+	bool _sendNTPpacket(IPAddress& address, uint16_t port);
+	void _NTPsyncInterval(const char* message);
 };

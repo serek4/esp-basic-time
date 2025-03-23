@@ -2,41 +2,36 @@
 
 AsyncUDP NTPudp;
 
-String BasicTime::_NTPServerAddress = DEFAULT_NTP_SERVER_ADDRESS;
-uint16_t BasicTime::_NTPServerPort = DEFAULT_NTP_PORT;
 int BasicTime::_timezone = DEFAULT_TIMEZONE;
-bool BasicTime::_waitingForNTP = false;
-u_long BasicTime::_requestSendedAt;
-bool BasicTime::_networkReady = false;
-bool BasicTime::_gotNTPserverIP = false;
-IPAddress BasicTime::_NTPServerIP = NULL_IP_ADDR;
-time_t BasicTime::_NTPSyncInterval = NTP_NORMAL_SYNC_INTERVAL;           // timeSet sync interval
-time_t BasicTime::_NTPReSyncInterval = NTP_SHORT_SYNC_INTERVAL;          // timeNeedsSync sync interval
-time_t BasicTime::_NTPnoSyncInterval = NTP_NO_TIME_SET_SYNC_INTERVAL;    // timeNotSet sync interval
-void (*BasicTime::_logger)(String logLevel, String msg) = nullptr;
 
-BasicTime::BasicTime(int timezone)
-    : _connectingIndicator(nullptr) {
+BasicTime::BasicTime(const char* NTP_server_address, int NTP_server_port, int timezone)
+    : _NTPServerAddress(NTP_server_address)
+    , _NTPServerPort(NTP_server_port)
+    , _waitingForNTP(false)
+    , _requestSendedAt(0)
+    , _networkReady(false)
+    , _gotNTPserverIP(false)
+    , _NTPServerIP(NULL_IP_ADDR)
+    , _NTPSyncInterval(NTP_NORMAL_SYNC_INTERVAL)           // timeSet sync interval
+    , _NTPReSyncInterval(NTP_SHORT_SYNC_INTERVAL)          // timeNeedsSync sync interval
+    , _NTPnoSyncInterval(NTP_NO_TIME_SET_SYNC_INTERVAL)    // timeNotSet sync interval
+    , _connectingIndicator(nullptr) {
 	_timezone = timezone;
 }
 BasicTime::BasicTime(const char* NTP_server_address, int timezone)
-    : _connectingIndicator(nullptr) {
-	_NTPServerAddress = NTP_server_address;
-	_timezone = timezone;
+    : BasicTime::BasicTime(NTP_server_address, DEFAULT_NTP_PORT, timezone) {
 }
-BasicTime::BasicTime(const char* NTP_server_address, int NTP_server_port, int timezone)
-    : _connectingIndicator(nullptr) {
-	_NTPServerAddress = NTP_server_address;
-	_NTPServerPort = NTP_server_port;
-	_timezone = timezone;
+BasicTime::BasicTime(int timezone)
+    : BasicTime::BasicTime(DEFAULT_NTP_SERVER_ADDRESS, DEFAULT_NTP_PORT, timezone) {
 }
+
 void BasicTime::addLogger(void (*logger)(String logLevel, String msg)) {
 	_logger = logger;
 }
 void BasicTime::setup() {
 	setSyncInterval(_NTPReSyncInterval);
-	setSyncProvider(requestNtpTime);
-	NTPudp.onPacket(_NTPrequestCallback);
+	setSyncProvider([&]() -> time_t { return requestNtpTime(); });
+	NTPudp.onPacket([&](AsyncUDPPacket& packet) { _NTPrequestCallback(packet); });
 }
 void BasicTime::setNetworkReady(bool ready) {
 	_networkReady = ready;
