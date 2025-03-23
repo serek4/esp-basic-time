@@ -5,7 +5,8 @@ AsyncUDP NTPudp;
 int BasicTime::_timezone = DEFAULT_TIMEZONE;
 
 BasicTime::BasicTime(const char* NTP_server_address, int NTP_server_port, int timezone)
-    : _NTPServerAddress(NTP_server_address)
+    : BasicPlugin::BasicPlugin("ntp")
+    , _NTPServerAddress(NTP_server_address)
     , _NTPServerPort(NTP_server_port)
     , _waitingForNTP(false)
     , _requestSendedAt(0)
@@ -25,9 +26,6 @@ BasicTime::BasicTime(int timezone)
     : BasicTime::BasicTime(DEFAULT_NTP_SERVER_ADDRESS, DEFAULT_NTP_PORT, timezone) {
 }
 
-void BasicTime::addLogger(void (*logger)(String logLevel, String msg)) {
-	_logger = logger;
-}
 void BasicTime::setup() {
 	setSyncInterval(_NTPReSyncInterval);
 	setSyncProvider([&]() -> time_t { return requestNtpTime(); });
@@ -63,7 +61,7 @@ time_t BasicTime::requestNtpTime() {
 	if (_networkReady) {
 		if (_NTPServerIP == NULL_IP_ADDR) {
 			WiFi.hostByName(_NTPServerAddress.c_str(), _NTPServerIP);
-			if (_logger != nullptr) { (*_logger)("ntp", "new ntp server ip: " + _NTPServerIP.toString()); }
+			_log(_info_, "new ntp server ip: " + _NTPServerIP.toString());
 		}
 		BASIC_TIME_PRINTLN("Syncing time with NTP");
 		_sendNTPpacket(_NTPServerIP, _NTPServerPort);
@@ -86,7 +84,7 @@ void BasicTime::_NTPrequestCallback(AsyncUDPPacket& packet) {    // response pac
 void BasicTime::handle() {
 	if (_networkReady && !_gotNTPserverIP) {    // waiting for WiFi connection to get NTP server IP
 		_gotNTPserverIP = WiFi.hostByName(_NTPServerAddress.c_str(), _NTPServerIP);
-		if (_logger != nullptr) { (*_logger)("ntp", "ntp server ip: " + _NTPServerIP.toString()); }
+		_log(_info_, "ntp server ip: " + _NTPServerIP.toString());
 		if (timeStatus() != timeSet) {
 			requestNtpTime();
 		}
@@ -147,7 +145,7 @@ void BasicTime::_NTPsyncInterval(const char* message) {
 	}
 	BASIC_TIME_PRINTLN(logMessage);
 	logMessage.replace("\n", ". ");
-	if (_logger != nullptr) { (*_logger)("ntp", logMessage); }
+	_log(_info_, logMessage);
 }
 //converting timestamp to human readable date string (RRRR-MM-DD)
 String BasicTime::dateString(time_t timestamp) {

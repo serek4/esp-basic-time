@@ -8,6 +8,7 @@
 #include <ESPAsyncUDP.h>
 #endif
 #include <TimeLib.h>
+#include <esp-basic-plugin.hpp>
 
 // #define BASIC_TIME_DEBUG
 // debug printing macros
@@ -45,13 +46,12 @@
 #define NTP_NO_TIME_SET_SYNC_INTERVAL 5 * SECS_PER_MIN
 #define NTP_FIRST_SYNC_INTERVAL_THRESHOLD NTP_NO_TIME_SET_SYNC_INTERVAL * 1000
 
-class BasicTime {
+class BasicTime : public BasicPlugin {
   public:
 	BasicTime(const char* NTP_server_address, int NTP_server_port, int timezone);
 	BasicTime(const char* NTP_server_address, int timezone);
 	BasicTime(int timezone);
 
-	void addLogger(void (*logger)(String logLevel, String msg));
 	void setup();
 	void setNetworkReady(bool ready);
 	void setWaitingFunction(void (*connectingIndicator)(u_long onTime, u_long offTime));
@@ -77,7 +77,6 @@ class BasicTime {
 	time_t _NTPnoSyncInterval;    // timeNotSet sync interval
 
 	void (*_connectingIndicator)(u_long onTime, u_long offTime);
-	void (*_logger)(String logLevel, String msg);
 	void _NTPrequestCallback(AsyncUDPPacket& packet);
 	bool _sendNTPpacket(IPAddress& address, uint16_t port);
 	void _NTPsyncInterval(const char* message);
